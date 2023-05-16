@@ -1,6 +1,9 @@
 import ChartsEmbedSDK from "@mongodb-js/charts-embed-dom";
 import { useState, useEffect } from "react";
 
+const appId = "data-uoxfe";
+const dataApiBaseUrl = "https://us-east-1.aws.data.mongodb-api.com/app/data-uoxfe/endpoint/data/v1";
+
 const sdk = new ChartsEmbedSDK({
   baseUrl: "https://charts.mongodb.com/charts-brainbrew-hqwvh", // Optional: ~REPLACE~ with the Base URL from your Embed Chart dialog
 });
@@ -46,23 +49,60 @@ const chart = sdk.createChart({
 
 export default function Chart() {
   const [payload, setPayload] = useState({});
+  const [accessToken, setAccessToken] = useState(null);
 
   useEffect(() => {
     const render = async () => {
       await chart.render(document.getElementById("chart"));
-      await chart.addEventListener("click", (payload) => {
+      await chart.addEventListener("click", async (payload) => {
         setPayload(payload);
-        console.log(payload);
+        fetchFromDataApi();
       });
     };
     render().catch((e) => window.alert(e.message));
+
+    const authenticate = async () => {
+      const authUrl = `https://realm.mongodb.com/api/client/v2.0/app/${appId}/auth/providers/anon-user/login`
+
+      // Authenticate with the server
+      // Anonymous authentication must be enabled in app services
+      const tokens = await fetch(authUrl).then(res => res.json());
+      setAccessToken(tokens.access_token);
+
+      }
+    authenticate();
   }, []);
+
+  const fetchFromDataApi = async () => {
+    // Make a call to the Data API
+    const url = `${dataApiBaseUrl}/action/findOne`;
+    const data = {
+      dataSource: "mongodb-atlas",
+      database: "lotr",
+      collection: "lotr",
+      filter: {}
+    };
+
+    debugger;
+
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${accessToken}`
+      },
+      body: JSON.stringify(data)
+    }).then(res => res.json());
+
+    console.log(response);
+  };
 
   return (
     <>
       <div id="chart"></div>
       <div id="info">
         <ul>
+          <li>Access Token: {accessToken}</li>
           <li>Role: {payload?.target?.role}</li>
           <li>Type: {payload?.target?.type}</li>
           <li>Fill: {payload?.target?.fill}</li>
