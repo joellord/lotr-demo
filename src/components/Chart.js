@@ -51,6 +51,8 @@ export default function Chart() {
   const [payload, setPayload] = useState({});
   const [accessToken, setAccessToken] = useState(null);
 
+  let token = null;
+
   useEffect(() => {
     const render = async () => {
       await chart.render(document.getElementById("chart"));
@@ -68,7 +70,7 @@ export default function Chart() {
       // Anonymous authentication must be enabled in app services
       const tokens = await fetch(authUrl).then(res => res.json());
       setAccessToken(tokens.access_token);
-
+      token = tokens.access_token;
       }
     authenticate();
   }, []);
@@ -77,19 +79,17 @@ export default function Chart() {
     // Make a call to the Data API
     const url = `${dataApiBaseUrl}/action/findOne`;
     const data = {
-      dataSource: "mongodb-atlas",
+      dataSource: "Cluster0",
       database: "lotr",
       collection: "lotr",
       filter: {}
     };
 
-    debugger;
-
     const response = await fetch(url, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${accessToken}`
+        "Authorization": `Bearer ${token}`
       },
       body: JSON.stringify(data)
     }).then(res => res.json());
