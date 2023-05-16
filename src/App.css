@@ -36,3 +36,24 @@
     transform: rotate(360deg);
   }
 }
+
+#chart {
+  width: 50%;
+  display: inline-block;
+}
+
+#info {
+  width: 50%;
+  display: inline-block;
+  vertical-align: top;
+}
+
+#info ul {
+  list-style-type: none;
+  padding: 0;
+  text-align: left;
+}
+
+pre {
+  text-align: left
+}
